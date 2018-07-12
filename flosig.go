@@ -7,8 +7,8 @@ package flosig
 import (
 	"bytes"
 	"encoding/base64"
-	"github.com/bitspill/flod/btcec"
-	"github.com/bitspill/flod/btcjson"
+	"github.com/bitspill/flod/floec"
+	"github.com/bitspill/flod/flojson"
 	"github.com/bitspill/flod/chaincfg"
 	"github.com/bitspill/flod/chaincfg/chainhash"
 	"github.com/bitspill/flod/wire"
