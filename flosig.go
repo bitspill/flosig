@@ -7,29 +7,29 @@ package bitsig_go
 import (
 	"bytes"
 	"encoding/base64"
-	"github.com/btcsuite/btcd/btcec"
-	"github.com/btcsuite/btcd/btcjson"
-	"github.com/btcsuite/btcd/chaincfg"
-	"github.com/btcsuite/btcd/chaincfg/chainhash"
-	"github.com/btcsuite/btcd/wire"
-	"github.com/btcsuite/btcutil"
+	"github.com/bitspill/flod/btcec"
+	"github.com/bitspill/flod/btcjson"
+	"github.com/bitspill/flod/chaincfg"
+	"github.com/bitspill/flod/chaincfg/chainhash"
+	"github.com/bitspill/flod/wire"
+	"github.com/bitspill/floutil"
 )
 
 func CheckSignature(checkAddress string, checkSignature string, message string, coinName string, net *chaincfg.Params) (bool, error) {
 	// Function body lifted from BTCD https://github.com/btcsuite/btcd/blob/807d344/rpcserver.go#L3607
 	// Decode the provided address.
-	addr, err := btcutil.DecodeAddress(checkAddress, net)
+	addr, err := floutil.DecodeAddress(checkAddress, net)
 	if err != nil {
-		return false, &btcjson.RPCError{
-			Code:    btcjson.ErrRPCInvalidAddressOrKey,
+		return false, &flojson.RPCError{
+			Code:    flojson.ErrRPCInvalidAddressOrKey,
 			Message: "Invalid address or key: " + err.Error(),
 		}
 	}
 
 	// Only P2PKH addresses are valid for signing.
-	if _, ok := addr.(*btcutil.AddressPubKeyHash); !ok {
-		return false, &btcjson.RPCError{
-			Code:    btcjson.ErrRPCType,
+	if _, ok := addr.(*floutil.AddressPubKeyHash); !ok {
+		return false, &flojson.RPCError{
+			Code:    flojson.ErrRPCType,
 			Message: "Address is not a pay-to-pubkey-hash address",
 		}
 	}
@@ -37,8 +37,8 @@ func CheckSignature(checkAddress string, checkSignature string, message string, 
 	// Decode base64 signature.
 	sig, err := base64.StdEncoding.DecodeString(checkSignature)
 	if err != nil {
-		return false, &btcjson.RPCError{
-			Code:    btcjson.ErrRPCParse.Code,
+		return false, &flojson.RPCError{
+			Code:    flojson.ErrRPCParse.Code,
 			Message: "Malformed base64 encoding: " + err.Error(),
 		}
 	}
@@ -49,7 +49,7 @@ func CheckSignature(checkAddress string, checkSignature string, message string, 
 	wire.WriteVarString(&buf, 0, coinName+" Signed Message:\n")
 	wire.WriteVarString(&buf, 0, message)
 	expectedMessageHash := chainhash.DoubleHashB(buf.Bytes())
-	pk, wasCompressed, err := btcec.RecoverCompact(btcec.S256(), sig,
+	pk, wasCompressed, err := floec.RecoverCompact(floec.S256(), sig,
 		expectedMessageHash)
 	if err != nil {
 		// Mirror Bitcoin Core behavior, which treats error in
@@ -64,7 +64,7 @@ func CheckSignature(checkAddress string, checkSignature string, message string, 
 	} else {
 		serializedPK = pk.SerializeUncompressed()
 	}
-	address, err := btcutil.NewAddressPubKey(serializedPK,
+	address, err := floutil.NewAddressPubKey(serializedPK,
 		net)
 	if err != nil {
 		// Again mirror Bitcoin Core behavior, which treats error in public key
