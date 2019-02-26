@@ -46,6 +46,13 @@ func CheckSignature(checkAddress string, checkSignature string, message string, 
 		}
 	}
 
+	if len(sig) == 0 {
+		return false, &flojson.RPCError{
+			Code:    flojson.ErrRPCParse.Code,
+			Message: "Malformed signature",
+		}
+	}
+
 	if sig[0] < 27 || sig[0] > 43 {
 		return false, &flojson.RPCError{
 			Code:    flojson.ErrRPCType,
