@@ -4,6 +4,8 @@ import (
 	"testing"
 
 	"github.com/bitspill/flod/chaincfg"
+	"github.com/bitspill/flod/floec"
+	"github.com/bitspill/floutil"
 )
 
 func TestCheckSignature(t *testing.T) {
@@ -110,5 +112,57 @@ func TestCheckSignature(t *testing.T) {
 				t.Errorf("got %t, expected %t", ok, tc.valid)
 			}
 		})
+	}
+}
+
+func TestSignMessagePk(t *testing.T) {
+	pk, err := floec.NewPrivateKey(floec.S256())
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	msg := "test message signed from go"
+
+	sig, err := SignMessagePk(msg, "Florincoin", pk, true)
+
+	addr, err := floutil.NewAddressPubKey(pk.PubKey().SerializeCompressed(), &chaincfg.MainNetParams)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	ok, err := CheckSignature(addr.EncodeAddress(), sig, msg, "Florincoin", &chaincfg.MainNetParams)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !ok {
+		t.Fatal("signature validation false")
+	}
+}
+
+func TestSignMessage(t *testing.T) {
+	pk, err := floec.NewPrivateKey(floec.S256())
+	if err != nil {
+		t.Fatal(err)
+	}
+	w, err := floutil.NewWIF(pk, &chaincfg.MainNetParams, true)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	msg := "test message signed from go"
+
+	sig, err := SignMessage(msg, "Florincoin", w.String())
+
+	addr, err := floutil.NewAddressPubKey(pk.PubKey().SerializeCompressed(), &chaincfg.MainNetParams)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	ok, err := CheckSignature(addr.EncodeAddress(), sig, msg, "Florincoin", &chaincfg.MainNetParams)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !ok {
+		t.Fatal("signature validation false")
 	}
 }

@@ -141,3 +141,26 @@ func CheckSignature(checkAddress string, checkSignature string, message string, 
 	// Return boolean if addresses match.
 	return address.EncodeAddress() == checkAddress, nil
 }
+
+func SignMessage(msg string, coinName string, wif string) (string, error) {
+	w, err := floutil.DecodeWIF(wif)
+	if err != nil {
+		return "", err
+	}
+
+	return SignMessagePk(msg, coinName, w.PrivKey, w.CompressPubKey)
+}
+
+func SignMessagePk(msg string, coinName string, prv *floec.PrivateKey, compressed bool) (string, error) {
+	var buf bytes.Buffer
+	_ = wire.WriteVarString(&buf, 0, coinName+" Signed Message:\n")
+	_ = wire.WriteVarString(&buf, 0, msg)
+	messageHash := chainhash.DoubleHashB(buf.Bytes())
+
+	sig, err := floec.SignCompact(floec.S256(), prv, messageHash, compressed)
+	if err != nil {
+		return "", err
+	}
+
+	return base64.StdEncoding.EncodeToString(sig), nil
+}
