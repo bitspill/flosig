@@ -1,0 +1,19 @@
+[prune]
+  go-tests = true
+  unused-packages = true
+
+[[constraint]]
+  name = "github.com/bitspill/flod"
+  branch = "master"
+
+[[constraint]]
+  name = "github.com/bitspill/floutil"
+  branch = "master"
+
+[[constraint]]
+  name = "github.com/btcsuite/btclog"
+  branch = "master"
+
+[[constraint]]
+  name = "golang.org/x/crypto"
+  branch = "master"
