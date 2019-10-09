@@ -22,8 +22,8 @@ type Vout struct {
 	Amount floutil.Amount
 }
 
-func CreateAndSignTx(vin []Vin, vout []Vout, keys map[string]*floutil.WIF, net *chaincfg.Params) (*wire.MsgTx, error) {
-	unsignedTx, err := CreateUnsignedTx(vin, vout)
+func CreateAndSignTx(vin []Vin, vout []Vout, keys map[string]*floutil.WIF, net *chaincfg.Params, floData string) (*wire.MsgTx, error) {
+	unsignedTx, err := CreateUnsignedTx(vin, vout, floData)
 	if err != nil {
 		return nil, err
 	}
@@ -36,8 +36,16 @@ func CreateAndSignTx(vin []Vin, vout []Vout, keys map[string]*floutil.WIF, net *
 	return signedTx, nil
 }
 
-func CreateUnsignedTx(vin []Vin, vout []Vout) (*wire.MsgTx, error) {
+func CreateUnsignedTx(vin []Vin, vout []Vout, floData string) (*wire.MsgTx, error) {
 	unsignedTx := wire.NewMsgTx(wire.TxVersion)
+
+	if len(floData) > 0 {
+		if unsignedTx.Version < 2 {
+			unsignedTx.Version = 2
+		}
+		unsignedTx.FloData = floData
+	}
+
 	for i := range vin {
 		op := wire.NewOutPoint(vin[i].Hash, vin[i].Index)
 		txIn := wire.NewTxIn(op, nil, nil)
