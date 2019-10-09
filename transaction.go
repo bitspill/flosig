@@ -23,12 +23,25 @@ type Vout struct {
 }
 
 func CreateAndSignTx(vin []Vin, vout []Vout, keys map[string]*floutil.WIF, net *chaincfg.Params) (*wire.MsgTx, error) {
-	outputTx := wire.NewMsgTx(wire.TxVersion)
+	unsignedTx, err := CreateUnsignedTx(vin, vout)
+	if err != nil {
+		return nil, err
+	}
 
+	signedTx, err := SignTx(keys, vin, net, unsignedTx)
+	if err != nil {
+		return nil, err
+	}
+
+	return signedTx, nil
+}
+
+func CreateUnsignedTx(vin []Vin, vout []Vout) (*wire.MsgTx, error) {
+	unsignedTx := wire.NewMsgTx(wire.TxVersion)
 	for i := range vin {
 		op := wire.NewOutPoint(vin[i].Hash, vin[i].Index)
 		txIn := wire.NewTxIn(op, nil, nil)
-		outputTx.AddTxIn(txIn)
+		unsignedTx.AddTxIn(txIn)
 	}
 
 	for i := range vout {
@@ -37,9 +50,13 @@ func CreateAndSignTx(vin []Vin, vout []Vout, keys map[string]*floutil.WIF, net *
 			return nil, err
 		}
 		txOut := wire.NewTxOut(int64(vout[i].Amount), script)
-		outputTx.AddTxOut(txOut)
+		unsignedTx.AddTxOut(txOut)
 	}
 
+	return unsignedTx, nil
+}
+
+func SignTx(keys map[string]*floutil.WIF, vin []Vin, net *chaincfg.Params, unsignedTx *wire.MsgTx) (*wire.MsgTx, error) {
 	lookupKey := func(a floutil.Address) (*floec.PrivateKey, bool, error) {
 		wif, ok := keys[a.EncodeAddress()]
 		if !ok {
@@ -47,16 +64,14 @@ func CreateAndSignTx(vin []Vin, vout []Vout, keys map[string]*floutil.WIF, net *
 		}
 		return wif.PrivKey, wif.CompressPubKey, nil
 	}
-
 	for i := range vin {
 		sigScript, err := txscript.SignTxOutput(net,
-			outputTx, i, vin[i].PkScript, txscript.SigHashAll,
+			unsignedTx, i, vin[i].PkScript, txscript.SigHashAll,
 			txscript.KeyClosure(lookupKey), nil, nil)
 		if err != nil {
 			return nil, err
 		}
-		outputTx.TxIn[i].SignatureScript = sigScript
+		unsignedTx.TxIn[i].SignatureScript = sigScript
 	}
-
-	return outputTx, nil
+	return unsignedTx, nil
 }
