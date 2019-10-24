@@ -65,7 +65,7 @@ func TestCreateAndSignTx(t *testing.T) {
 		addr.EncodeAddress(): wif,
 	}
 
-	redeemTx, err := CreateAndSignTx(vin, vout, keys, &chaincfg.MainNetParams)
+	redeemTx, err := CreateAndSignTx(vin, vout, keys, &chaincfg.MainNetParams, []byte("foo"))
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -3,7 +3,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:9172be69737d3c03d37905f7adab75cfc02973a7d8a84e18dd5d6186f40c46f1"
+  digest = "1:dbcbdfc3f99a3ce76313c4c3bfb07242eb317a5e2c735e30d322a1f1ef57dc3f"
   name = "github.com/bitspill/flod"
   packages = [
     "chaincfg",
@@ -14,7 +14,7 @@
     "wire",
   ]
   pruneopts = "UT"
-  revision = "15bb215c2f057c8f0c8f2b10a9cddc54e777c81e"
+  revision = "2ad8b32be4324a2a75b376977abb7be4da3e417b"
 
 [[projects]]
   branch = "master"
@@ -46,7 +46,7 @@
     "scrypt",
   ]
   pruneopts = "UT"
-  revision = "71b5226ff73902d121cd9dbbdfdb67045a805845"
+  revision = "87dc89f01550277dc22b74ffcf4cd89fa2f40f4c"
 
 [solve-meta]
   analyzer-name = "dep"
